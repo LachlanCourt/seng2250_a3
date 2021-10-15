@@ -17,5 +17,9 @@ if __name__ == "__main__":
             data = conn.recv(1024)
             if not data:
                 break
-            print(data)
+            if data != b'hello':
+                log("Invalid setup request. Terminating connection")
+                conn.close()
+                break
+            log("Setup request received. Generating and sending RSA public key")
         
