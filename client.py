@@ -11,7 +11,7 @@ if __name__ == "__main__":
         log("Connected")
         
         # Send setup request
-        log("Sending setup request")
+        log("Sending setup request: hello")
         s.sendall(b"hello")
 
         
