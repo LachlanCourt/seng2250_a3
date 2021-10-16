@@ -1,5 +1,6 @@
 import socket
 from IdGen import IdGen
+from RSA import RSA
 
 def log(msg):
     print("CLIENT LOGGING: " + msg)
@@ -28,10 +29,10 @@ if __name__ == "__main__":
 
         # Receive keys
         data = s.recv(2048)
-        rsan = data
+        rsan = int(deserialise(data))
         log(f"Key n received: \n{rsan}")
         data = s.recv(2048)
-        rsae = data
+        rsae = int(deserialise(data))
         log(f"Key e received: \n{rsae}")
 
         # Send Client Hello
