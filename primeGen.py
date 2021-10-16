@@ -53,13 +53,14 @@ def isMillerRabinPassed(mrc):
         if trialComposite(round_tester):
             return False
     return True
- 
-if __name__ == '__main__':
-    while True:
-        n = 1024
-        prime_candidate = getLowLevelPrime(n)
-        if not isMillerRabinPassed(prime_candidate):
-            continue
-        else:
-            print(n, "bit prime is: \n", prime_candidate)
-            break
+
+class PrimeGen:
+    def getPrime():
+        while True:
+            n = 1024
+            prime_candidate = getLowLevelPrime(n)
+            if not isMillerRabinPassed(prime_candidate):
+                continue
+            else:
+                return(prime_candidate)
+    

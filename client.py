@@ -11,7 +11,9 @@ if __name__ == "__main__":
         log("Connected")
         
         # Send setup request
-        log("Sending setup request: hello")
+        log("Sending setup request: Hello")
         s.sendall(b"hello")
-
-        
+        data = s.recv(2048)
+        log("Key n received: data")
+        data = s.recv(2048)
+        log("Key e received: data")

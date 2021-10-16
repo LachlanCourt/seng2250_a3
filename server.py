@@ -1,19 +1,12 @@
 import socket
+from RSA import RSA
 
 def log(msg):
     print("SERVER LOGGING: " + msg)
 
-
-def powmod2(b, e, n):
-    if n == 1:
-        return 0
-    rs = 1
-    while (e > 0):
-        if (e & 1) == 1:
-            rs = (rs * b) % n
-        e = e >> 1
-        b = (b * b) % n
-    return rs
+def serialise(d):
+    return str.encode(str(d))
+    
 
 PORT = 50007
 
@@ -33,5 +26,8 @@ if __name__ == "__main__":
                 log("Invalid setup request. Terminating connection")
                 conn.close()
                 break
-            log("Setup request received. Generating and sending RSA public key")
-        
+            log("Setup request received. Generating RSA keys")
+            keys = RSA.genRSA()
+            conn.sendall(serialise(keys[0][0])) # public key n
+            conn.sendall(serialise(keys[0][1])) # public key e
+            print(keys)
