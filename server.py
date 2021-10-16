@@ -5,8 +5,11 @@ from IdGen import IdGen
 def log(msg):
     print("SERVER LOGGING: " + msg)
 
-def serialise(d):
-    return str.encode(str(d))
+def serialise(data):
+    return str.encode(str(data))
+
+def deserialise(data):
+    return data.decode()
     
 
 PORT = 50007

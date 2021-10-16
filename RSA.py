@@ -24,3 +24,9 @@ class RSA:
         d = pow(e, -1, phi)
         
         return [(n, e), d]
+
+    def encrypt(n, e, m):
+        return ""
+
+    def decrypt(n, d, c):
+        return ""
