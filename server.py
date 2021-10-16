@@ -11,6 +11,22 @@ def serialise(data):
 def deserialise(data):
     return data.decode()
     
+def recvEncryptedMessage(conn, rsan, rsae, keys):
+    data = deserialise(conn.recv(10000))
+    messages = data.split("#")
+    message = messages[0]
+    signature = messages[1]
+    messageParts = message.split(",")
+    signatureParts = signature.split(",")
+
+    decryptedMessage = ""
+    decryptedSignature = ""
+    for i in range(len(messageParts)):
+        decryptedMessage += RSA.decrypt(keys[0][0], keys[1], int(messageParts[i]))
+        decryptedSignature += str(RSA.decrypt(rsan, rsae, int(signatureParts[i])))
+
+    if decryptedMessage == decryptedSignature:
+        return decryptedMessage
 
 PORT = 50007
 
@@ -57,12 +73,38 @@ if __name__ == "__main__":
                 conn.sendall(serialise(sid)) # SID
 
                 ## Receive p and q for DH key exchange
-                data = conn.recv(2028)
-                log(f"Data received: \n{deserialise(data)}")
-                decoded = RSA.decrypt(keys[0][0], keys[1], int(deserialise(data)))
-                log(f"Decrypted message: \n{decoded}")
+                data = recvEncryptedMessage(conn, rsan, rsae, keys)
+                log(f"Received DH prime p: \n{data}")
+##                data = conn.recv(2028)
+##                log(f"Data received: \n{deserialise(data)}")
+##                decoded = RSA.decrypt(keys[0][0], keys[1], int(deserialise(data)))
+##                log(f"Decrypted message: \n{decoded}")
                 
             else: # Invalid
                 log("Invalid request. Terminating connection")
                 conn.close()
                 break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
