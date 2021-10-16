@@ -47,3 +47,10 @@ if __name__ == "__main__":
         sid = data
         log(f"SID received: \n{sid}")
         
+        # Send p and q for DH key exchange
+        #message = DHp
+        message = "Hello there this message will be encrypted"
+        encrypted = RSA.encrypt(rsan, rsae, message)
+        log(f"Encrypted: {encrypted}")
+        s.sendall(serialise(encrypted))
+        

@@ -46,6 +46,11 @@ if __name__ == "__main__":
                 conn.sendall(serialise(ids)) # IDs
                 log(f"Sending SID: \n{sid}")
                 conn.sendall(serialise(sid)) # SID
+
+                data = conn.recv(2028)
+                log(f"Data received: \n{deserialise(data)}")
+                decoded = RSA.decrypt(keys[0][0], keys[1], int(deserialise(data)))
+                log(f"Decrypted message: \n{decoded}")
                 
             else: # Invalid
                 log("Invalid request. Terminating connection")
