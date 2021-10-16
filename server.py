@@ -28,6 +28,7 @@ if __name__ == "__main__":
                 break
             log("Setup request received. Generating RSA keys")
             keys = RSA.genRSA()
+            log(f"Sending RSA public key n: \n{keys[0][0]}")
             conn.sendall(serialise(keys[0][0])) # public key n
+            log(f"Sending RSA public key e: \n{keys[0][1]}")
             conn.sendall(serialise(keys[0][1])) # public key e
-            print(keys)

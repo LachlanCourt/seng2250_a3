@@ -14,6 +14,6 @@ if __name__ == "__main__":
         log("Sending setup request: Hello")
         s.sendall(b"hello")
         data = s.recv(2048)
-        log("Key n received: data")
+        log(f"Key n received: \n{data}")
         data = s.recv(2048)
-        log("Key e received: data")
+        log(f"Key e received: \n{data}")
