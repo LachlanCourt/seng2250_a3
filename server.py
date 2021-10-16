@@ -30,12 +30,21 @@ if __name__ == "__main__":
                 break
             if data == b'Hello': # Setup request
                 # Generate and send keys
-                log("Setup request received. Generating RSA keys")
+                log("Setup request received. Generating server RSA keys")
                 keys = RSA.genRSA()
                 log(f"Sending RSA public key n: \n{keys[0][0]}")
                 conn.sendall(serialise(keys[0][0])) # public key n
                 log(f"Sending RSA public key e: \n{keys[0][1]}")
                 conn.sendall(serialise(keys[0][1])) # public key e
+
+                # Receive keys
+                data = conn.recv(2048)
+                rsan = int(deserialise(data))
+                log(f"Key n received: \n{rsan}")
+                data = conn.recv(2048)
+                rsae = int(deserialise(data))
+                log(f"Key e received: \n{rsae}")
+                
             elif len(data) == 20: # Client Hello
                 idc = data
                 log(f"Client hello received: \n{idc}")
@@ -47,6 +56,7 @@ if __name__ == "__main__":
                 log(f"Sending SID: \n{sid}")
                 conn.sendall(serialise(sid)) # SID
 
+                ## Receive p and q for DH key exchange
                 data = conn.recv(2028)
                 log(f"Data received: \n{deserialise(data)}")
                 decoded = RSA.decrypt(keys[0][0], keys[1], int(deserialise(data)))

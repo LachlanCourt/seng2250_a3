@@ -35,6 +35,16 @@ if __name__ == "__main__":
         rsae = int(deserialise(data))
         log(f"Key e received: \n{rsae}")
 
+        # Generate and send RSA key
+        log("Generating client RSA keys")
+        keys = RSA.genRSA()
+        log(f"Sending RSA public key n: \n{keys[0][0]}")
+        s.sendall(serialise(keys[0][0])) # public key n
+        log(f"Sending RSA public key e: \n{keys[0][1]}")
+        s.sendall(serialise(keys[0][1])) # public key e
+
+        ## NEW COMMUNICATION ##
+
         # Send Client Hello
         idc = idGen.getID(20)
         log(f"Sending client hello:\n {idc}")
@@ -47,6 +57,8 @@ if __name__ == "__main__":
         data = s.recv(2048)
         sid = data
         log(f"SID received: \n{sid}")
+
+        
         
         # Send p and q for DH key exchange
         #message = DHp
