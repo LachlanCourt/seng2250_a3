@@ -1,6 +1,7 @@
 import socket
 from RSA import RSA
 from IdGen import IdGen
+from SHA import SHA
 
 def log(msg):
     print("SERVER LOGGING: " + msg)
@@ -20,13 +21,15 @@ def recvEncryptedMessage(conn, rsan, rsae, keys):
     signatureParts = signature.split(",")
 
     decryptedMessage = ""
-    decryptedSignature = ""
     for i in range(len(messageParts)):
-        decryptedMessage += RSA.decrypt(keys[0][0], keys[1], int(messageParts[i]))
-        decryptedSignature += str(RSA.decrypt(rsan, rsae, int(signatureParts[i])))
-
-    if decryptedMessage == decryptedSignature:
-        return decryptedMessage
+        decryptedSegment = RSA.decrypt(keys[0][0], keys[1], int(messageParts[i]))
+        relevantSignature = signatureParts[i]
+        hashedSegment = SHA.hash(decryptedSegment)
+        signatureVerification = RSA.decrypt(rsan, rsae, int(relevantSignature))
+        if hashedSegment != signatureVerification:
+            return
+        decryptedMessage += decryptedSegment
+    return decryptedMessage
 
 PORT = 50007
 
