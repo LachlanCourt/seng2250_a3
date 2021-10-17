@@ -4,6 +4,7 @@ from IdGen import IdGen
 from SHA import SHA
 from Comms import Comms
 from DH import DH
+from Hmac import Hmac
 
 def log(msg):
     print("SERVER LOGGING: " + msg)
@@ -91,6 +92,15 @@ if __name__ == "__main__":
                 if sessionKey != clientSessionKey:
                     conn.close()
                     continue
+
+                # Receive message from client
+                data = deserialise(conn.recv(2048)).split("#")
+                if not Hmac.verHmac(data[0], data[1], sessionKey):
+                    conn.close()
+                    continue
+                log(f"Received 64 byte data: \n{data[0]}")
+
+                
             else: # Invalid
                 log("Invalid request. Terminating connection")
                 conn.close()
