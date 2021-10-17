@@ -76,11 +76,14 @@ if __name__ == "__main__":
                 conn.sendall(serialise(sid)) # SID
 
                 ## Receive p for DH key exchange
-                DHp = recvEncryptedMessage(conn, rsan, rsae, keys)
+                DHp = int(recvEncryptedMessage(conn, rsan, rsae, keys))
                 log(f"Received DH prime p: \n{DHp}")
                 # Receive g for DH key exchange
-                DHg = recvEncryptedMessage(conn, rsan, rsae, keys)
+                DHg = int(recvEncryptedMessage(conn, rsan, rsae, keys))
                 log(f"Received DH generator g: \n{DHg}")
+
+                dhPriv = DH.getPrivateKey(DHp)
+                log(f"Generatred DH private key: \n{dhPriv}")
 
                 
             else: # Invalid
