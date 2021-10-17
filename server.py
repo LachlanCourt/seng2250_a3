@@ -82,7 +82,15 @@ if __name__ == "__main__":
                 # Calculate session key
                 sessionKey = DH.genSessionKey(clientPub, dhPriv, DHp)
                 log(f"Calculated session key: \n{sessionKey}")
-                
+
+                # Check session key
+                encrypted = Comms.sendEncryptedMessage(conn, rsan, rsae, keys, sessionKey)
+                log(f"Sending session key: \n{encrypted}")
+                clientSessionKey = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                log(f"Received client session key: \n{clientSessionKey}")
+                if sessionKey != clientSessionKey:
+                    conn.close()
+                    continue
             else: # Invalid
                 log("Invalid request. Terminating connection")
                 conn.close()

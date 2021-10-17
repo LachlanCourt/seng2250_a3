@@ -1,4 +1,4 @@
-import socket, time
+import socket, time, sys
 from IdGen import IdGen
 from RSA import RSA
 from SHA import SHA
@@ -89,6 +89,15 @@ if __name__ == "__main__":
         # Calculate session key
         sessionKey = DH.genSessionKey(servPub, dhPriv, DHp)
         log(f"Calculated session key: \n{sessionKey}")
+
+        # Check session key
+        serverSessionKey = int(Comms.recvEncryptedMessage(s, rsan, rsae, keys))
+        log(f"Received server session key: \n{serverSessionKey}")
+        encrypted = Comms.sendEncryptedMessage(s, rsan, rsae, keys, sessionKey)
+        log(f"Sending session key: \n{encrypted}")
+        if sessionKey != serverSessionKey:
+            s.close()
+            sys.exit(1)
 
 
 
