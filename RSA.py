@@ -1,7 +1,6 @@
 from PrimeGen import PrimeGen
 
-class RSA:
-    def powmod2(b, e, n):
+def powmod2(b, e, n):
         if n == 1:
             return 0
         rs = 1
@@ -11,6 +10,8 @@ class RSA:
             e = e >> 1
             b = (b * b) % n
         return rs
+
+class RSA:
 
     def genRSA():
         e = 65537 # as per spec
@@ -22,5 +23,12 @@ class RSA:
         phi = (p - 1) * (q - 1)
         #d = (1 % phi) / e
         d = pow(e, -1, phi)
-        
         return [(n, e), d]
+
+    def encrypt(n, e, m):
+        return powmod2(int.from_bytes(str.encode(str(m)), "big"), e, n)
+
+    def decrypt(n, d, c):
+        result = powmod2(c, d, n)
+        byteRestult = result.to_bytes((result.bit_length() + 7) // 8, "big")
+        return byteRestult.decode()
