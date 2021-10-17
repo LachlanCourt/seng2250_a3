@@ -2,6 +2,8 @@ import socket
 from RSA import RSA
 from IdGen import IdGen
 from SHA import SHA
+from Comms import Comms
+from DH import DH
 
 def log(msg):
     print("SERVER LOGGING: " + msg)
@@ -12,24 +14,7 @@ def serialise(data):
 def deserialise(data):
     return data.decode()
     
-def recvEncryptedMessage(conn, rsan, rsae, keys):
-    data = deserialise(conn.recv(10000))
-    messages = data.split("#")
-    message = messages[0]
-    signature = messages[1]
-    messageParts = message.split(",")
-    signatureParts = signature.split(",")
 
-    decryptedMessage = ""
-    for i in range(len(messageParts)):
-        decryptedSegment = RSA.decrypt(keys[0][0], keys[1], int(messageParts[i]))
-        relevantSignature = signatureParts[i]
-        hashedSegment = SHA.hash(decryptedSegment)
-        signatureVerification = RSA.decrypt(rsan, rsae, int(relevantSignature))
-        if hashedSegment != signatureVerification:
-            return
-        decryptedMessage += decryptedSegment
-    return decryptedMessage
 
 PORT = 50007
 
@@ -75,14 +60,37 @@ if __name__ == "__main__":
                 log(f"Sending SID: \n{sid}")
                 conn.sendall(serialise(sid)) # SID
 
-                ## Receive p and q for DH key exchange
-                data = recvEncryptedMessage(conn, rsan, rsae, keys)
-                log(f"Received DH prime p: \n{data}")
-##                data = conn.recv(2028)
-##                log(f"Data received: \n{deserialise(data)}")
-##                decoded = RSA.decrypt(keys[0][0], keys[1], int(deserialise(data)))
-##                log(f"Decrypted message: \n{decoded}")
-                
+                ## Receive p for DH key exchange
+                DHp = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                log(f"Received DH prime p: \n{DHp}")
+                # Receive g for DH key exchange
+                DHg = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                log(f"Received DH generator g: \n{DHg}")
+
+                # Generate DH keys
+                dhPriv = DH.genPrivateKey(DHp)
+                log(f"Generated DH private key: \n{dhPriv}")
+                dhPub = DH.genPublicKey(DHp, DHg, dhPriv)
+                # Send public key
+                encrypted = Comms.sendEncryptedMessage(conn, rsan, rsae, keys, dhPub)
+                log(f"Sending RSA encrypted public key: \n{encrypted}")
+
+                # Receive client public key
+                clientPub = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                log(f"Received DH public key: \n{clientPub}")
+
+                # Calculate session key
+                sessionKey = DH.genSessionKey(clientPub, dhPriv, DHp)
+                log(f"Calculated session key: \n{sessionKey}")
+
+                # Check session key
+                encrypted = Comms.sendEncryptedMessage(conn, rsan, rsae, keys, sessionKey)
+                log(f"Sending session key: \n{encrypted}")
+                clientSessionKey = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                log(f"Received client session key: \n{clientSessionKey}")
+                if sessionKey != clientSessionKey:
+                    conn.close()
+                    continue
             else: # Invalid
                 log("Invalid request. Terminating connection")
                 conn.close()
