@@ -1,15 +1,5 @@
 from PrimeGen import PrimeGen
-
-def powmod2(b, e, n):
-        if n == 1:
-            return 0
-        rs = 1
-        while (e > 0):
-            if (e & 1) == 1:
-                rs = (rs * b) % n
-            e = e >> 1
-            b = (b * b) % n
-        return rs
+from Common import Common
 
 class RSA:
 
@@ -26,9 +16,9 @@ class RSA:
         return [(n, e), d]
 
     def encrypt(n, e, m):
-        return powmod2(int.from_bytes(str.encode(str(m)), "big"), e, n)
+        return Common.powmod2(int.from_bytes(str.encode(str(m)), "big"), e, n)
 
     def decrypt(n, d, c):
-        result = powmod2(c, d, n)
+        result = Common.powmod2(c, d, n)
         byteRestult = result.to_bytes((result.bit_length() + 7) // 8, "big")
         return byteRestult.decode()
