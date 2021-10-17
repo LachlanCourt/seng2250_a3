@@ -82,10 +82,14 @@ if __name__ == "__main__":
         sid = data
         log(f"SID received: \n{sid}")
 
-        # Send p and q for DH key exchange
+        # Send p for DH key exchange
         message = DHp
         encrypted = sendEncryptedMessage(s, rsan, rsae, keys, message)
-        log(f"Sending RSA encrypted DHp key and RSA signature: \n{encrypted}")
+        log(f"Sending RSA encrypted DHp prime and RSA signature: \n{encrypted}")
+        # Send g for DH key exchange
+        message = DHg
+        encrypted = sendEncryptedMessage(s, rsan, rsae, keys, message)
+        log(f"Sending RSA encrypted DHg generator and RSA signature: \n{encrypted}")
 
 
 
