@@ -5,9 +5,10 @@ from SHA import SHA
 from Comms import Comms
 from DH import DH
 from Hmac import Hmac
+from AES2 import AES2
 
 def log(msg):
-    print("SERVER LOGGING: " + msg)
+    print("\nSERVER LOGGING: " + msg)
 
 def serialise(data):
     return str.encode(str(data))
@@ -93,12 +94,29 @@ if __name__ == "__main__":
                     conn.close()
                     continue
 
+                ###### Data Exchange ######
+                
                 # Receive message from client
-                data = deserialise(conn.recv(2048)).split("#")
+                data = deserialise(conn.recv(10000)).split("#")
+                log(f"Received AES encrypted message with hash verification: \n{data}")
                 if not Hmac.verHmac(data[0], data[1], sessionKey):
                     conn.close()
                     continue
-                log(f"Received 64 byte data: \n{data[0]}")
+                log(f"Hash verified data: \n{data[0]}")
+                message = AES2.decrypt(data[0], sessionKey)
+                log(f"Decrypted AES data to original message: \n{message}")
+
+                # Send message
+                message = "Thankyou for the message I really appreciated the perfect length"
+                encryptedMessage = AES2.encrypt(message, sessionKey)
+                #encryptedMessage = message
+                log(f"Generated encrypted message: \n{encryptedMessage}")
+                # Create HMAC from session key
+                messageMac = Hmac.hmac(encryptedMessage, sessionKey)
+                log(f"Hashed message for integrity: \n{messageMac}")
+                sendMessage = encryptedMessage + "#" + messageMac
+                conn.sendall(serialise(sendMessage))
+                log(f"Sending encrypted message: \n{message}")
 
                 
             else: # Invalid
