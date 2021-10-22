@@ -107,11 +107,11 @@ if __name__ == "__main__":
                 log(f"Decrypted AES data to original message: \n{message}")
 
                 # Send message
-                # Create HMAC from session key
                 message = "Thankyou for the message I really appreciated the perfect length"
                 encryptedMessage = AES2.encrypt(message, sessionKey)
                 #encryptedMessage = message
                 log(f"Generated encrypted message: \n{encryptedMessage}")
+                # Create HMAC from session key
                 messageMac = Hmac.hmac(encryptedMessage, sessionKey)
                 log(f"Hashed message for integrity: \n{messageMac}")
                 sendMessage = encryptedMessage + "#" + messageMac

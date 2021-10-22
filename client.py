@@ -50,8 +50,8 @@ if __name__ == "__main__":
         log(f"Sending RSA public key e: \n{keys[0][1]}")
         s.sendall(serialise(keys[0][1])) # public key e
 
-
         time.sleep(3)
+        
         ## NEW COMMUNICATION ##
 
         # Send Client Hello
@@ -104,11 +104,11 @@ if __name__ == "__main__":
         ###### Data Exchange ######
 
         # Send message
-        # Create HMAC from session key
         message = "This message is exactly 64 bytes long to be encrypted with AES!!"
         encryptedMessage = AES2.encrypt(message, sessionKey)
         #encryptedMessage = message
         log(f"Generated encrypted message: \n{encryptedMessage}")
+        # Create HMAC from session key
         messageMac = Hmac.hmac(encryptedMessage, sessionKey)
         log(f"Hashed message for integrity: \n{messageMac}")
         sendMessage = encryptedMessage + "#" + messageMac
