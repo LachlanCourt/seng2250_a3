@@ -10,7 +10,7 @@ def deserialise(data):
     return data.decode()
 
 class Comms:
-    def recvEncryptedMessage(conn, rsan, rsae, keys):
+    def recvRSAMessage(conn, rsan, rsae, keys):
         data = deserialise(conn.recv(10000))
         messages = data.split("#")
         message = messages[0]
@@ -29,7 +29,7 @@ class Comms:
             decryptedMessage += decryptedSegment
         return decryptedMessage
 
-    def sendEncryptedMessage(s, rsan, rsae, keys, message):
+    def sendRSAMessage(s, rsan, rsae, keys, message):
         messages = []
         message = str(message)
         while len(message) > MAX_MESSAGE_SIZE:

@@ -63,10 +63,10 @@ if __name__ == "__main__":
                 conn.sendall(serialise(sid)) # SID
 
                 ## Receive p for DH key exchange
-                DHp = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                DHp = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
                 log(f"Received DH prime p: \n{DHp}")
                 # Receive g for DH key exchange
-                DHg = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                DHg = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
                 log(f"Received DH generator g: \n{DHg}")
 
                 # Generate DH keys
@@ -74,11 +74,11 @@ if __name__ == "__main__":
                 log(f"Generated DH private key: \n{dhPriv}")
                 dhPub = DH.genPublicKey(DHp, DHg, dhPriv)
                 # Send public key
-                encrypted = Comms.sendEncryptedMessage(conn, rsan, rsae, keys, dhPub)
+                encrypted = Comms.sendRSAMessage(conn, rsan, rsae, keys, dhPub)
                 log(f"Sending RSA encrypted public key: \n{encrypted}")
 
                 # Receive client public key
-                clientPub = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                clientPub = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
                 log(f"Received DH public key: \n{clientPub}")
 
                 # Calculate session key
@@ -86,9 +86,9 @@ if __name__ == "__main__":
                 log(f"Calculated session key: \n{sessionKey}")
 
                 # Check session key
-                encrypted = Comms.sendEncryptedMessage(conn, rsan, rsae, keys, sessionKey)
+                encrypted = Comms.sendRSAMessage(conn, rsan, rsae, keys, sessionKey)
                 log(f"Sending session key: \n{encrypted}")
-                clientSessionKey = int(Comms.recvEncryptedMessage(conn, rsan, rsae, keys))
+                clientSessionKey = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
                 log(f"Received client session key: \n{clientSessionKey}")
                 if sessionKey != clientSessionKey:
                     conn.close()
