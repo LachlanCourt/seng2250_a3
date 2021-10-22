@@ -35,20 +35,18 @@ if __name__ == "__main__":
         s.sendall(b"Hello")
 
         # Receive keys
-        data = s.recv(2048)
-        rsan = int(deserialise(data))
+        data = deserialise(s.recv(2048)).split("#")
+        rsan = int(data[0])
         log(f"Key n received: \n{rsan}")
-        data = s.recv(2048)
-        rsae = int(deserialise(data))
+        rsae = int(data[1])
         log(f"Key e received: \n{rsae}")
 
         # Generate and send RSA key
         log("Generating client RSA keys")
         keys = RSA.genRSA()
-        log(f"Sending RSA public key n: \n{keys[0][0]}")
-        s.sendall(serialise(keys[0][0])) # public key n
-        log(f"Sending RSA public key e: \n{keys[0][1]}")
-        s.sendall(serialise(keys[0][1])) # public key e
+        sendMessage = str(keys[0][0]) + "#" + str(keys[0][1])
+        log(f"Sending RSA public keys: \n{sendMessage}")
+        s.sendall(serialise(sendMessage)) # public key n and e
 
         time.sleep(3)
         
@@ -56,7 +54,7 @@ if __name__ == "__main__":
 
         # Send Client Hello
         idc = idGen.getID(20)
-        log(f"Sending client hello:\n {idc}")
+        log(f"Sending client hello:\n{idc}")
         s.sendall(serialise(idc))
 
         # Receive IDs and SID
@@ -69,15 +67,15 @@ if __name__ == "__main__":
 
         # Send p for DH key exchange
         message = DHp
-        encrypted = Comms.sendEncryptedMessage(s, rsan, rsae, keys, message)
+        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, message)
         log(f"Sending RSA encrypted DHp prime and RSA signature: \n{encrypted}")
         # Send g for DH key exchange
         message = DHg
-        encrypted = Comms.sendEncryptedMessage(s, rsan, rsae, keys, message)
+        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, message)
         log(f"Sending RSA encrypted DHg generator and RSA signature: \n{encrypted}")
 
         # Receive server public key
-        servPub = int(Comms.recvEncryptedMessage(s, rsan, rsae, keys))
+        servPub = int(Comms.recvRSAMessage(s, rsan, rsae, keys))
         log(f"Received DH public key: \n{servPub}")
 
         # Generate DH keys
@@ -85,7 +83,7 @@ if __name__ == "__main__":
         log(f"Generated DH private key: \n{dhPriv}")
         dhPub = DH.genPublicKey(DHp, DHg, dhPriv)
         # Send public key
-        encrypted = Comms.sendEncryptedMessage(s, rsan, rsae, keys, dhPub)
+        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, dhPub)
         log(f"Sending RSA encrypted public key: \n{encrypted}")
 
         # Calculate session key
@@ -93,9 +91,9 @@ if __name__ == "__main__":
         log(f"Calculated session key: \n{sessionKey}")
 
         # Check session key
-        serverSessionKey = int(Comms.recvEncryptedMessage(s, rsan, rsae, keys))
+        serverSessionKey = int(Comms.recvRSAMessage(s, rsan, rsae, keys))
         log(f"Received server session key: \n{serverSessionKey}")
-        encrypted = Comms.sendEncryptedMessage(s, rsan, rsae, keys, sessionKey)
+        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, sessionKey)
         log(f"Sending session key: \n{encrypted}")
         if sessionKey != serverSessionKey:
             s.close()
@@ -113,7 +111,7 @@ if __name__ == "__main__":
         log(f"Hashed message for integrity: \n{messageMac}")
         sendMessage = encryptedMessage + "#" + messageMac
         s.sendall(serialise(sendMessage))
-        log(f"Sending encrypted message: \n{message}")
+        log(f"Sending encrypted message: \n{sendMessage}")
 
 
         # Receive message
