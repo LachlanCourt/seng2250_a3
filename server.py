@@ -38,17 +38,15 @@ if __name__ == "__main__":
                 # Generate and send keys
                 log("Setup request received. Generating server RSA keys")
                 keys = RSA.genRSA()
-                log(f"Sending RSA public key n: \n{keys[0][0]}")
-                conn.sendall(serialise(keys[0][0])) # public key n
-                log(f"Sending RSA public key e: \n{keys[0][1]}")
-                conn.sendall(serialise(keys[0][1])) # public key e
+                sendMessage = str(keys[0][0]) + "#" + str(keys[0][1])
+                log(f"Sending RSA public keys: \n{sendMessage}")
+                conn.sendall(serialise(sendMessage)) # public key n and e
 
                 # Receive keys
-                data = conn.recv(2048)
-                rsan = int(deserialise(data))
+                data = deserialise(conn.recv(2048)).split("#")
+                rsan = int(data[0])
                 log(f"Key n received: \n{rsan}")
-                data = conn.recv(2048)
-                rsae = int(deserialise(data))
+                rsae = int(data[1])
                 log(f"Key e received: \n{rsae}")
                 
             elif len(data) == 20: # Client Hello
