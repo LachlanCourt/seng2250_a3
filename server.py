@@ -106,6 +106,7 @@ if __name__ == "__main__":
 
                 # Send message
                 message = "Thankyou for the message I really appreciated the perfect length"
+                log(f"Message to be sent to client:\n{message}")
                 encryptedMessage = AES2.encrypt(message, sessionKey)
                 #encryptedMessage = message
                 log(f"Generated encrypted message: \n{encryptedMessage}")
