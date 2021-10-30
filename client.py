@@ -103,6 +103,7 @@ if __name__ == "__main__":
 
         # Send message
         message = "This message is exactly 64 bytes long to be encrypted with AES!!"
+        log(f"Message to be sent to server:\n{message}")
         encryptedMessage = AES2.encrypt(message, sessionKey)
         #encryptedMessage = message
         log(f"Generated encrypted message: \n{encryptedMessage}")
