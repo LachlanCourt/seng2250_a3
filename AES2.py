@@ -13,7 +13,7 @@ class AES2:
             message = message[BLOCK_SIZE:]
         messages.append(message)
         
-        initialIv = str.encode("aaaaaaaaaaaaaaaa")#b64encode(get_random_bytes(BLOCK_SIZE)).decode()
+        initialIv = str.encode(b64encode(get_random_bytes(BLOCK_SIZE)).decode()[:16])
         iv = initialIv
         encrypted = ""
         for i in messages:
