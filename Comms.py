@@ -1,3 +1,8 @@
+### SENG2250 Assignment 3
+### Lachlan Court
+### c3308061
+### 31/10/2021
+
 from RSA import RSA
 from SHA import SHA
 
