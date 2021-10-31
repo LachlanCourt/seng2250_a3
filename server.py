@@ -50,7 +50,7 @@ if __name__ == "__main__":
                 log(f"Key e received: \n{rsae}")
                 
             elif len(data) == 20: # Client Hello
-                idc = data
+                idc = deserialise(data)
                 log(f"Client hello received: \n{idc}")
                 # Generate and send server ID and session ID
                 ids = idGen.getID(20)
@@ -84,13 +84,17 @@ if __name__ == "__main__":
                 log(f"Calculated session key: \n{sessionKey}")
 
                 # Check session key
-                encrypted = Comms.sendRSAMessage(conn, rsan, rsae, keys, sessionKey)
-                log(f"Sending session key: \n{encrypted}")
-                clientSessionKey = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
-                log(f"Received client session key: \n{clientSessionKey}")
-                if sessionKey != clientSessionKey:
+                clientHashed = deserialise(conn.recv(10000))
+                log(f"Received client hashed key with id and session id:\n{clientHashed}")
+                testHashed = SHA.hash(str(sessionKey) + idc + sid)
+                if clientHashed != testHashed:
                     conn.close()
                     continue
+                log("Client session key is valid")
+
+                serverHashed = SHA.hash(str(sessionKey) + idc + ids + sid)
+                log(f"Sending hashed key with both ids and session id: \n{serverHashed}")
+                conn.sendall(serialise(serverHashed))
 
                 ###### Data Exchange ######
                 

@@ -20,8 +20,6 @@ def deserialise(data):
     return data.decode()
 
 
-
-
 if __name__ == "__main__":
     idGen = IdGen()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -59,10 +57,10 @@ if __name__ == "__main__":
 
         # Receive IDs and SID
         data = s.recv(2048)
-        ids = data
+        ids = deserialise(data)
         log(f"IDs received: \n{ids}")
         data = s.recv(2048)
-        sid = data
+        sid = deserialise(data)
         log(f"SID received: \n{sid}")
 
         # Send p for DH key exchange
@@ -92,13 +90,18 @@ if __name__ == "__main__":
         log(f"Calculated session key: \n{sessionKey}")
 
         # Check session key
-        serverSessionKey = int(Comms.recvRSAMessage(s, rsan, rsae, keys))
-        log(f"Received server session key: \n{serverSessionKey}")
-        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, sessionKey)
-        log(f"Sending session key: \n{encrypted}")
-        if sessionKey != serverSessionKey:
+        clientHashed = SHA.hash(str(sessionKey) + idc + sid)
+        log(f"Sending hashed key with id and session id: \n{clientHashed}")
+        s.sendall(serialise(clientHashed))
+
+        
+        serverHashed = deserialise(s.recv(10000))
+        log(f"Received server hashed key with id and session id:\n{clientHashed}")
+        testHashed = SHA.hash(str(sessionKey) + idc + ids + sid)
+        if serverHashed != testHashed:
             s.close()
             sys.exit(1)
+        log("Server session key is valid")
 
         ###### Data Exchange ######
 
