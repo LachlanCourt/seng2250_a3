@@ -1,3 +1,8 @@
+### SENG2250 Assignment 3
+### Lachlan Court
+### c3308061
+### 31/10/2021
+
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from base64 import b64encode, b64decode

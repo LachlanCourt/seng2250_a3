@@ -1,3 +1,8 @@
+### SENG2250 Assignment 3
+### Lachlan Court
+### c3308061
+### 31/10/2021
+
 import socket
 from RSA import RSA
 from IdGen import IdGen
@@ -50,7 +55,7 @@ if __name__ == "__main__":
                 log(f"Key e received: \n{rsae}")
                 
             elif len(data) == 20: # Client Hello
-                idc = data
+                idc = deserialise(data)
                 log(f"Client hello received: \n{idc}")
                 # Generate and send server ID and session ID
                 ids = idGen.getID(20)
@@ -71,12 +76,12 @@ if __name__ == "__main__":
                 dhPriv = DH.genPrivateKey(DHp)
                 log(f"Generated DH private key: \n{dhPriv}")
                 dhPub = DH.genPublicKey(DHp, DHg, dhPriv)
-                # Send public key
+                # Send public key encrypted with RSA to prevent against MITM attacks
                 encrypted = Comms.sendRSAMessage(conn, rsan, rsae, keys, dhPub)
                 log(f"Sending RSA encrypted public key: \n{encrypted}")
 
                 # Receive client public key
-                clientPub = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
+                clientPub = int(deserialise(conn.recv(10000)))
                 log(f"Received DH public key: \n{clientPub}")
 
                 # Calculate session key
@@ -84,13 +89,17 @@ if __name__ == "__main__":
                 log(f"Calculated session key: \n{sessionKey}")
 
                 # Check session key
-                encrypted = Comms.sendRSAMessage(conn, rsan, rsae, keys, sessionKey)
-                log(f"Sending session key: \n{encrypted}")
-                clientSessionKey = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
-                log(f"Received client session key: \n{clientSessionKey}")
-                if sessionKey != clientSessionKey:
+                clientHashed = deserialise(conn.recv(10000))
+                log(f"Received client hashed key with id and session id:\n{clientHashed}")
+                testHashed = SHA.hash(str(sessionKey) + idc + sid)
+                if clientHashed != testHashed:
                     conn.close()
                     continue
+                log("Client session key is valid")
+
+                serverHashed = SHA.hash(str(sessionKey) + idc + ids + sid)
+                log(f"Sending hashed key with both ids and session id: \n{serverHashed}")
+                conn.sendall(serialise(serverHashed))
 
                 ###### Data Exchange ######
                 

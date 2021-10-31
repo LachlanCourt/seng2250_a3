@@ -1,3 +1,8 @@
+### SENG2250 Assignment 3
+### Lachlan Court
+### c3308061
+### 31/10/2021
+
 import socket, time, sys
 from IdGen import IdGen
 from RSA import RSA
@@ -18,8 +23,6 @@ def serialise(data):
 
 def deserialise(data):
     return data.decode()
-
-
 
 
 if __name__ == "__main__":
@@ -59,10 +62,10 @@ if __name__ == "__main__":
 
         # Receive IDs and SID
         data = s.recv(2048)
-        ids = data
+        ids = deserialise(data)
         log(f"IDs received: \n{ids}")
         data = s.recv(2048)
-        sid = data
+        sid = deserialise(data)
         log(f"SID received: \n{sid}")
 
         # Send p for DH key exchange
@@ -82,22 +85,28 @@ if __name__ == "__main__":
         dhPriv = DH.genPrivateKey(DHp)
         log(f"Generated DH private key: \n{dhPriv}")
         dhPub = DH.genPublicKey(DHp, DHg, dhPriv)
-        # Send public key
-        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, dhPub)
-        log(f"Sending RSA encrypted public key: \n{encrypted}")
+        
+        # Send public key with no encryption, as the server doesn't need to verify the client
+        s.sendall(serialise(dhPub))
+        log(f"Sending public key: \n{dhPub}")
 
         # Calculate session key
         sessionKey = DH.genSessionKey(servPub, dhPriv, DHp)
         log(f"Calculated session key: \n{sessionKey}")
 
         # Check session key
-        serverSessionKey = int(Comms.recvRSAMessage(s, rsan, rsae, keys))
-        log(f"Received server session key: \n{serverSessionKey}")
-        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, sessionKey)
-        log(f"Sending session key: \n{encrypted}")
-        if sessionKey != serverSessionKey:
+        clientHashed = SHA.hash(str(sessionKey) + idc + sid)
+        log(f"Sending hashed key with id and session id: \n{clientHashed}")
+        s.sendall(serialise(clientHashed))
+
+        
+        serverHashed = deserialise(s.recv(10000))
+        log(f"Received server hashed key with id and session id:\n{clientHashed}")
+        testHashed = SHA.hash(str(sessionKey) + idc + ids + sid)
+        if serverHashed != testHashed:
             s.close()
             sys.exit(1)
+        log("Server session key is valid")
 
         ###### Data Exchange ######
 
