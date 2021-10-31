@@ -82,9 +82,10 @@ if __name__ == "__main__":
         dhPriv = DH.genPrivateKey(DHp)
         log(f"Generated DH private key: \n{dhPriv}")
         dhPub = DH.genPublicKey(DHp, DHg, dhPriv)
-        # Send public key
-        encrypted = Comms.sendRSAMessage(s, rsan, rsae, keys, dhPub)
-        log(f"Sending RSA encrypted public key: \n{encrypted}")
+        
+        # Send public key with no encryption, as the server doesn't need to verify the client
+        s.sendall(serialise(dhPub))
+        log(f"Sending public key: \n{dhPub}")
 
         # Calculate session key
         sessionKey = DH.genSessionKey(servPub, dhPriv, DHp)

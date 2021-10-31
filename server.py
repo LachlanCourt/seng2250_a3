@@ -71,12 +71,12 @@ if __name__ == "__main__":
                 dhPriv = DH.genPrivateKey(DHp)
                 log(f"Generated DH private key: \n{dhPriv}")
                 dhPub = DH.genPublicKey(DHp, DHg, dhPriv)
-                # Send public key
+                # Send public key encrypted with RSA to prevent against MITM attacks
                 encrypted = Comms.sendRSAMessage(conn, rsan, rsae, keys, dhPub)
                 log(f"Sending RSA encrypted public key: \n{encrypted}")
 
                 # Receive client public key
-                clientPub = int(Comms.recvRSAMessage(conn, rsan, rsae, keys))
+                clientPub = int(deserialise(conn.recv(10000)))
                 log(f"Received DH public key: \n{clientPub}")
 
                 # Calculate session key
